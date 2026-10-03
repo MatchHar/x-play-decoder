@@ -1,68 +1,53 @@
 # X Play decoder source and build materials
 
-Corresponding open-source playback-library materials for the proposed X Play
-3.02 (70) release. This repository contains no proprietary X Play application
-source, account data, signing credentials, media, or application diagnostics.
-Publication of source materials does not imply that an App Store build has
-completed or passed review.
+Corresponding open-source library materials for X Play 3.02 (72). No proprietary
+application code, media, credentials, signing files, or playback logs are included.
+Source publication is not evidence of App Store approval or physical-device testing.
 
 ## Sources and modifications
 
-- VLCKit: `5d3535a664e7815765a5cee40d9b22527d7299cc`
-  from https://code.videolan.org/videolan/VLCKit
-- VLC: `c9628afc4b221b171ec2d9e028782b9eb1247426`
-  from https://code.videolan.org/videolan/vlc, with the 20 patches supplied by
-  that VLCKit revision, followed by the two VLC patches in this repository.
-- FFmpeg: 8.1.2 source archive, SHA-256
+- VLCKit: `5d3535a664e7815765a5cee40d9b22527d7299cc`, from
+  https://code.videolan.org/videolan/VLCKit
+- VLC: `c9628afc4b221b171ec2d9e028782b9eb1247426`, from
+  https://code.videolan.org/videolan/vlc, with its 20 VLCKit-supplied patches,
+  followed by `vlc-truehd.patch`, `vlc-ass-fallback.patch`, and `vlc-apple-output.patch`.
+- FFmpeg 8.1.2 source SHA-256:
   `464beb5e7bf0c311e68b45ae2f04e9cc2af88851abb4082231742a74d97b524c`.
-- Other dependency versions and patches are defined in the included VLC
-  `contrib/src` tree. The source bundle also contains dependency source archives
-  and a SHA-256 inventory, not just links to upstream repositories.
+- Other dependencies and licenses are in VLC `contrib/src`; their source archives
+  and a complete SHA-256 source inventory accompany the full source bundle.
 
-X Play changes, 2026-10-02:
+Modifications dated 2026-10-02 enable TrueHD/MLP decoding, preserve ASS fallback
+font selection, correct Apple arm64 architecture and visionOS module registration,
+and package iOS/tvOS 18+ and visionOS 2+ framework slices. Modifications dated
+2026-10-03 supply PCM **per-sample** timing to AVSampleBufferAudioRenderer and
+flush the video sample-buffer layer only when Apple explicitly requires recovery.
+Modified files carry their modification notice. Components retain their upstream
+licenses; VLCKit/libVLC are LGPL-2.1-or-later. See COPYING.LGPL-2.1 and the full
+upstream notices. No warranty is provided.
 
-- Enable the FFmpeg TrueHD/MLP software decoder in the Apple build.
-- Supply the configured font family to the Apple libass fallback path, retaining
-  explicitly requested and embedded ASS fonts ahead of the fallback.
-- Correct arm64 device/simulator selection and visionOS static-module registration;
-  remove the obsolete visionOS linker flag.
-- Build framework slices explicitly for iOS/tvOS 18 and visionOS 2 or newer.
+## Complete corresponding source
 
-The modifications remain under the affected upstream file's license. VLCKit
-and the libVLC library are LGPL-2.1-or-later; individual third-party components
-retain their own copyright and license notices. See `COPYING.LGPL-2.1` and the
-complete license files in the source bundle. No warranty is provided.
+https://github.com/MatchHar/x-play-decoder/releases/tag/xplay-3.02-72
 
-## Download full source
+The release's `xplay-decoder-3.02-72-source.tar.gz` contains patched VLCKit and VLC
+sources, dependency source archives, scripts, notices, and SOURCE-SHA256SUMS.txt.
+The checksum is supplied separately. No prebuilt app or framework is distributed.
+Earlier release archives remain unchanged.
 
-The `xplay-3.02-70` GitHub release provides `xplay-decoder-3.02-70-source.tar.gz`
-and its SHA-256 file. It contains clean source trees with these patches applied,
-their original license notices, dependency archives, and the build scripts.
-It contains no prebuilt framework or X Play app.
+## Build and replacement
 
-The repository's `stamp-modifications.cjs` is a source-only provenance supplement
-added after that initial archive. Apply it to the unpacked `source` directory
-before rebuilding: it inserts the modification date and summary into the five
-modified files. The current Cloud script performs this step automatically.
-Use the scripts from this repository with the archived sources; the original
-archive and checksum are retained unchanged for traceability.
+The production `Distribution/DecoderQA-2026-10-02/build-cloud-decoder.sh` rebuilds
+the pinned sources using Xcode 27.0 build 27A266a. Cloud platforms iOS, tvOS,
+xrOS/visionOS are supported; beta toolchains are rejected. It produces only
+Dependencies/VLCKit.xcframework and does not upload an app.
 
-## Build
+For an independent rebuild, unpack the source bundle, install the tools listed
+in the build script, and run the included VLCKit compile-cloud.sh wrapper with
+`-r -a aarch64 -v -e` followed by the absolute VLC source path. Add `-t` for tvOS
+or `-i` for visionOS. Run archive-decoder-framework.sh with the source root and
+desired SDK to package the library. Obtain Apple's SDK/toolchain separately.
+Keep the public VLCKit ABI compatible when substituting a modified framework.
 
-The production integration uses `Distribution/DecoderQA-2026-10-02/` scripts.
-The Cloud entry point requires Xcode 27.0 build 27A266a and accepts
-`CI_PRODUCT_PLATFORM=iOS`, `tvOS`, or `xrOS` (the Cloud value for visionOS);
-`visionOS` is also accepted as an alias. It rejects a beta toolchain.
-It outputs only `Dependencies/VLCKit.xcframework` and never uploads an app.
-
-For independently rebuilding or modifying the library, unpack the source bundle,
-install the build tools listed in `build-cloud-decoder.sh`, and use the included
-VLCKit `compile-cloud.sh` static-library wrapper with `-r -a aarch64 -v -e`
-and the absolute path to the bundled `vlc` directory. Add `-t` for tvOS or `-i`
-for visionOS. Then use `archive-decoder-framework.sh` with the source root and
-the desired SDK. The Apple SDK/toolchain is obtained separately from Apple.
-Keep the public VLCKit ABI compatible if substituting a modified framework.
-
-X Play dynamically links VLCKit. X Play imposes no restriction on replacement
-or reverse engineering of that component for debugging modifications allowed
-by its license. Platform signing requirements are separate from library rights.
+X Play dynamically links VLCKit and imposes no restriction on replacement or
+reverse engineering of that library for debugging modifications allowed by its
+license. Platform signing requirements are separate from these library rights.

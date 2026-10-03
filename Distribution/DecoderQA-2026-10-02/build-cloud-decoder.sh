@@ -40,6 +40,7 @@ done
 test "$decoder_patch_count" -eq 20
 git -C "$decoder_stage/vlc" apply "$qa_dir/vlc-truehd.patch"
 git -C "$decoder_stage/vlc" apply "$qa_dir/vlc-ass-fallback.patch"
+git -C "$decoder_stage/vlc" apply "$qa_dir/vlc-apple-output.patch"
 git -C "$decoder_stage/VLCKit" apply "$qa_dir/vlckit-apple-arm64.patch"
 export HOMEBREW_NO_AUTO_UPDATE=1
 brew install autoconf automake libtool pkg-config cmake ninja meson nasm gettext gperf bison flex python node

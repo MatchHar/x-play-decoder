@@ -1,0 +1,33 @@
+diff --git a/modules/audio_output/apple/avsamplebuffer.m b/modules/audio_output/apple/avsamplebuffer.m
+--- a/modules/audio_output/apple/avsamplebuffer.m
++++ b/modules/audio_output/apple/avsamplebuffer.m
+@@ -174,7 +174,9 @@
+     }
+ 
+     const CMSampleTimingInfo timeInfo = {
+-        .duration = kCMTimeInvalid,
++        // X Play modification, 2026-10-03: PCM timing is per sample, not per block.
++        // Invalid timing can stall the renderer's request-media-data callback.
++        .duration = CMTimeMake(1, _sampleRate),
+         .presentationTimeStamp = CMTimeMake(_ptsSamples, _sampleRate),
+         .decodeTimeStamp = kCMTimeInvalid,
+     };
+diff --git a/modules/video_output/apple/VLCSampleBufferDisplay.m b/modules/video_output/apple/VLCSampleBufferDisplay.m
+--- a/modules/video_output/apple/VLCSampleBufferDisplay.m
++++ b/modules/video_output/apple/VLCSampleBufferDisplay.m
+@@ -901,6 +901,15 @@
+     }
+ 
+     @synchronized(sys.displayLayer) {
++        // X Play modification, 2026-10-03: recover Apple's explicitly invalidated
++        // decoder after output/lifecycle changes. Use the layer API consistently
++        // with enqueue below; do not mix it with sampleBufferRenderer methods.
++        if (@available(iOS 14.0, tvOS 14.0, macOS 11.0, *)) {
++            if (sys.displayLayer.requiresFlushToResumeDecoding) {
++                msg_Warn(vd, "sample buffer video output requires recovery flush");
++                [sys.displayLayer flush];
++            }
++        }
+         [sys.displayLayer enqueueSampleBuffer:sampleBuffer];
+     }
+ 
