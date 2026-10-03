@@ -40,6 +40,13 @@ and its SHA-256 file. It contains clean source trees with these patches applied,
 their original license notices, dependency archives, and the build scripts.
 It contains no prebuilt framework or X Play app.
 
+The repository's `stamp-modifications.cjs` is a source-only provenance supplement
+added after that initial archive. Apply it to the unpacked `source` directory
+before rebuilding: it inserts the modification date and summary into the five
+modified files. The current Cloud script performs this step automatically.
+Use the scripts from this repository with the archived sources; the original
+archive and checksum are retained unchanged for traceability.
+
 ## Build
 
 The production integration uses `Distribution/DecoderQA-2026-10-02/` scripts.

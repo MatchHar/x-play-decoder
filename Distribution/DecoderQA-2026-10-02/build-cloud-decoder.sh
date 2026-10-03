@@ -41,13 +41,14 @@ test "$decoder_patch_count" -eq 20
 git -C "$decoder_stage/vlc" apply "$qa_dir/vlc-truehd.patch"
 git -C "$decoder_stage/vlc" apply "$qa_dir/vlc-ass-fallback.patch"
 git -C "$decoder_stage/VLCKit" apply "$qa_dir/vlckit-apple-arm64.patch"
+export HOMEBREW_NO_AUTO_UPDATE=1
+brew install autoconf automake libtool pkg-config cmake ninja meson nasm gettext gperf bison flex python node
+node "$qa_dir/stamp-modifications.cjs" "$decoder_stage"
 # The wrapper's final packaging assumes old deployment targets and Intel sims.
 # Build only the static inputs with it, then archive the two frameworks explicitly.
 awk '{ print; if ($0 == "shift $(($OPTIND - 1))") print "BUILD_FRAMEWORK=no" }' \
     "$decoder_stage/VLCKit/compileAndBuildVLCKit.sh" > "$decoder_stage/VLCKit/compile-cloud.sh"
 ln -s "$decoder_stage/vlc" "$decoder_stage/VLCKit/libvlc/vlc"
-export HOMEBREW_NO_AUTO_UPDATE=1
-brew install autoconf automake libtool pkg-config cmake ninja meson nasm gettext gperf bison flex python
 export VLC_PATH="$(brew --prefix)/bin:$(brew --prefix bison)/bin:$(brew --prefix flex)/bin:$(brew --prefix gettext)/bin"
 export MAKEFLAGS=-j6
 (
