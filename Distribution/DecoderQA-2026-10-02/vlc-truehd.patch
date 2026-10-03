@@ -1,0 +1,16 @@
+diff --git a/contrib/src/ffmpeg/rules.mak b/contrib/src/ffmpeg/rules.mak
+--- a/contrib/src/ffmpeg/rules.mak
++++ b/contrib/src/ffmpeg/rules.mak
+@@ -47,9 +47,9 @@ FFMPEGCONF += \
+ 	--disable-securetransport
+ ifdef HAVE_IOS
+ FFMPEGCONF += \
+-	--disable-decoder=mlp \
+-	--disable-demuxer=mlp \
+-	--disable-parser=mlp
++	--enable-decoder=mlp,truehd \
++	--enable-demuxer=mlp,truehd \
++	--enable-parser=mlp
+ endif
+ endif
+ 

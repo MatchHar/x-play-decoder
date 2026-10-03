@@ -1,0 +1,27 @@
+diff --git a/modules/codec/libass.c b/modules/codec/libass.c
+--- a/modules/codec/libass.c
++++ b/modules/codec/libass.c
+@@ -234,8 +234,12 @@
+     }
+ 
+ #elif defined( __APPLE__ )
++    /* Reuse the application's registered, readable font family as the
++     * missing-glyph fallback. ASS's requested/embedded font still wins. */
++    char *psz_app_family = var_InheritString( p_dec, "freetype-font" );
+     const char *psz_font = NULL; /* We don't ship a default font with VLC */
+-    const char *psz_family = "Helvetica Neue"; /* Use HN if we can't find anything more suitable - Arial is not on all Apple platforms */
++    const char *psz_family = psz_app_family && *psz_app_family
++                          ? psz_app_family : "Helvetica Neue";
+ #else
+     const char *psz_font = NULL; /* We don't ship a default font with VLC */
+     const char *psz_family = "Arial"; /* Use Arial if we can't find anything more suitable */
+@@ -258,6 +262,9 @@
+     ass_set_fonts( p_renderer, psz_font, psz_family, ASS_FONTPROVIDER_AUTODETECT, NULL, 0 );
+ #endif
+ 
++#if defined( __APPLE__ ) && !defined( __ANDROID__ )
++    free( psz_app_family ); /* ass_set_fonts copies its family argument. */
++#endif
+     /* Anything else than NONE will break smooth img updating.
+        TODO: List and force ASS_HINTING_LIGHT for known problematic fonts */
+     ass_set_hinting( p_renderer, ASS_HINTING_NONE );

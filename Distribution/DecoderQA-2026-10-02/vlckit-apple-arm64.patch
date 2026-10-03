@@ -1,0 +1,83 @@
+diff --git a/Sources/Core/VLCLibrary.m b/Sources/Core/VLCLibrary.m
+--- a/Sources/Core/VLCLibrary.m
++++ b/Sources/Core/VLCLibrary.m
+@@ -45,6 +45,14 @@
+ #endif
+ #endif
+ 
++#if TARGET_OS_VISION
++#if TARGET_OS_SIMULATOR
++# include "vlc-plugins-xr-simulator-arm64.h"
++#else
++# include "vlc-plugins-xr-device-arm64.h"
++#endif
++#endif
++
+ #if TARGET_OS_IOS
+ #if TARGET_OS_SIMULATOR
+ #if __x86_64__
+diff --git a/VLCKit.xcodeproj/project.pbxproj b/VLCKit.xcodeproj/project.pbxproj
+--- a/VLCKit.xcodeproj/project.pbxproj
++++ b/VLCKit.xcodeproj/project.pbxproj
+@@ -1364,11 +1364,9 @@
+ 				MTL_ENABLE_DEBUG_INFO = NO;
+ 				"OTHER_LDFLAGS[sdk=xros*]" = (
+ 					"-ObjC",
+-					"-ld64",
+ 				);
+ 				"OTHER_LDFLAGS[sdk=xrsimulator*]" = (
+ 					"-ObjC",
+-					"-ld64",
+ 				);
+ 				"OTHER_LIBTOOLFLAGS[arch=*]" = "";
+ 				PRODUCT_BUNDLE_IDENTIFIER = org.videolan.vlckit;
+@@ -1455,11 +1453,9 @@
+ 				);
+ 				"OTHER_LDFLAGS[sdk=xros*]" = (
+ 					"-ObjC",
+-					"-ld64",
+ 				);
+ 				"OTHER_LDFLAGS[sdk=xrsimulator*]" = (
+ 					"-ObjC",
+-					"-ld64",
+ 				);
+ 				"OTHER_LIBTOOLFLAGS[sdk=iphonesimulator*]" = "-read_only_relocs suppress";
+ 				PRODUCT_BUNDLE_IDENTIFIER = org.videolan.vlckit;
+diff --git a/compileAndBuildVLCKit.sh b/compileAndBuildVLCKit.sh
+--- a/compileAndBuildVLCKit.sh
++++ b/compileAndBuildVLCKit.sh
+@@ -269,7 +269,9 @@ buildMobileKit() {
+                 echo "*** Framework ARCH: ${FARCH} is invalid ***"
+                 exit 1
+             fi
+-            if (is_simulator_arch $FARCH);then
++            # Apple Silicon uses arm64 on BOTH device and simulator. Respect
++            # the requested pass instead of silently rebuilding the device.
++            if (is_simulator_arch $FARCH) || [ "$PLATFORM" = "iphonesimulator" ]; then
+                 if [ "$TVOS" = "yes" ]; then
+                     PLATFORM="appletvsimulator"
+                 fi
+@@ -352,11 +354,18 @@ build_simulator_static_lib() {
+     VLCSTATICMODULELIST=""
+ 
+     # brute-force test the available architectures we could lipo
+-    check_lipo "${OSSTYLE}simulator" x86_64
+-    check_lipo "${OSSTYLE}simulator" arm64
+-    # watch and XR is not -simulator suffixed in the script unfortunately.
+-    check_lipo "${OSSTYLE}" arm64
+-    check_lipo "${OSSTYLE}" x86_64
++    if [ "$OSSTYLE" = "xros" ]; then
++        # visionOS simulator SDK/build directory is xrsimulator, never xros.
++        # Do not accidentally package the device archive as a simulator slice.
++        check_lipo "xrsimulator" arm64
++    else
++        check_lipo "${OSSTYLE}simulator" x86_64
++        check_lipo "${OSSTYLE}simulator" arm64
++        if [ "$OSSTYLE" = "watch" ]; then
++            check_lipo "${OSSTYLE}" arm64
++            check_lipo "${OSSTYLE}" x86_64
++        fi
++    fi
+ 
+     if [ ! -z "${VLCSTATICLIBS}" ]; then
+         spushd ${VLCROOT}
