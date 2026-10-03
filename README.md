@@ -51,7 +51,8 @@ archive and checksum are retained unchanged for traceability.
 
 The production integration uses `Distribution/DecoderQA-2026-10-02/` scripts.
 The Cloud entry point requires Xcode 27.0 build 27A266a and accepts
-`CI_PRODUCT_PLATFORM=iOS`, `tvOS`, or `visionOS`; it rejects a beta toolchain.
+`CI_PRODUCT_PLATFORM=iOS`, `tvOS`, or `xrOS` (the Cloud value for visionOS);
+`visionOS` is also accepted as an alias. It rejects a beta toolchain.
 It outputs only `Dependencies/VLCKit.xcframework` and never uploads an app.
 
 For independently rebuilding or modifying the library, unpack the source bundle,

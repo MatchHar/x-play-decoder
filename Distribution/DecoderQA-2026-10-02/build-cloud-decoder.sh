@@ -20,7 +20,7 @@ decoder_flags=(-r -a aarch64)
 case "$decoder_platform" in
     iOS) decoder_device=iphoneos; decoder_sim=iphonesimulator ;;
     tvOS) decoder_device=appletvos; decoder_sim=appletvsimulator; decoder_flags+=(-t) ;;
-    visionOS) decoder_device=xros; decoder_sim=xrsimulator; decoder_flags+=(-i) ;;
+    xrOS|visionOS) decoder_device=xros; decoder_sim=xrsimulator; decoder_flags+=(-i) ;;
     *) printf 'Unsupported Cloud platform\n' >&2; exit 2 ;;
 esac
 test ! -e "$repo_dir/Dependencies/VLCKit.xcframework" || {
